@@ -351,6 +351,45 @@ adaptive interval still applies and a 20-minute tick rarely polls everything.
 `~/Downloads`. Those are TCC-protected and scheduled jobs are refused with
 `Operation not permitted` — for launchd as well as cron.
 
+## Dashboard
+
+`jobscraper dashboard` renders `dashboard.html` from the database: a filterable
+desk of every matching role, with counts per filter and per-row triage
+(shortlist / applied / dismissed).
+
+Filters: posted window (24h / 48h / 7d / 30d), role family, max years of
+experience (with a "only if stated" strictness toggle), seniority, US location,
+full-time, remote, top-100 H-1B sponsors, free text, and six sort orders.
+
+### Auto-refresh
+
+The generated file is a self-contained snapshot — open it locally, or serve it.
+Two ways to keep it current:
+
+**Locally** — the installed crontab regenerates `dashboard.html` after every
+poll. Only refreshes while the machine is awake.
+
+**In CI** — `.github/workflows/refresh.yml` runs the poller on GitHub's
+schedule and publishes the dashboard to GitHub Pages, so the page stays current
+without any machine of yours being on. State carries between runs as a gzipped
+SQLite file in the Actions cache (~15 MB after pruning non-matched payloads);
+without it every run would look like a first crawl and `first_seen_at` would
+reset, which is the whole basis of "new since last time".
+
+Trigger a run by hand from the Actions tab, or:
+
+```bash
+gh workflow run refresh.yml -f tier=tier1
+```
+
+Note the cost shape on a **GitHub Free** account: Actions minutes are unlimited
+for public repositories but capped at 2,000/month for private ones, and Pages
+requires either a public repository or a paid plan. Hourly Tier 1 plus four
+daily Workday runs lands around 3,000 minutes/month, so a private repo needs
+either a slower cadence or a paid plan.
+
+---
+
 ## Project layout
 
 ```

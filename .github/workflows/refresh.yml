@@ -1,0 +1,118 @@
+name: Refresh job data
+
+# Tier 1 is cheap (one request per board, most return 304); Workday is not
+# (20 rows per request, no caching), so they run on separate schedules.
+on:
+  schedule:
+    - cron: '0 * * * *'            # Tier 1, hourly
+    - cron: '15 2,8,14,20 * * *'   # Workday, 4x a day
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: Which tier to poll
+        type: choice
+        default: tier1
+        options: [tier1, workday, all]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two refreshes race: the database is a single SQLite file.
+concurrency:
+  group: jobscraper-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - run: pip install httpx pyyaml
+
+      - name: Pick tier
+        id: tier
+        run: |
+          case "${{ github.event.schedule }}" in
+            "0 * * * *")          echo "tier=tier1"   >> "$GITHUB_OUTPUT" ;;
+            "15 2,8,14,20 * * *") echo "tier=workday" >> "$GITHUB_OUTPUT" ;;
+            *) echo "tier=${{ inputs.tier || 'tier1' }}" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      # State carries across runs as a gzipped SQLite file (~15 MB). Without it
+      # every run would look like a first crawl and first_seen_at would reset,
+      # which is the whole basis of "new since last time".
+      - name: Restore database
+        uses: actions/cache/restore@v4
+        with:
+          path: jobs.db.gz
+          key: jobs-db-${{ github.run_id }}
+          restore-keys: jobs-db-
+
+      - name: Unpack database
+        run: |
+          if [ -f jobs.db.gz ]; then
+            gunzip -kf jobs.db.gz && echo "restored $(du -h jobs.db | cut -f1)"
+          else
+            echo "no cached database — this run will behave as a first crawl"
+          fi
+
+      - name: Poll
+        run: |
+          case "${{ steps.tier.outputs.tier }}" in
+            tier1)   ARGS="--only greenhouse ashby lever smartrecruiters recruitee rippling breezy bamboohr" ;;
+            workday) ARGS="--only workday" ;;
+            all)     ARGS="" ;;
+          esac
+          python -m jobscraper.cli poll $ARGS
+
+      - name: Build dashboard
+        run: |
+          python -m jobscraper.cli dashboard --out dashboard.html
+          python -m jobscraper.cli stats
+
+      - name: Pack database
+        run: |
+          python - <<'PY'
+          import sqlite3
+          c = sqlite3.connect("jobs.db")
+          # Payloads are only needed for roles that matched the filter.
+          c.execute("UPDATE job SET raw=NULL, description_text=NULL WHERE is_match=0")
+          c.execute("DELETE FROM job WHERE closed_at IS NOT NULL "
+                    "AND closed_at < datetime('now','-60 days')")
+          c.commit(); c.execute("VACUUM"); c.close()
+          PY
+          gzip -9f jobs.db
+          du -h jobs.db.gz
+
+      - name: Save database
+        uses: actions/cache/save@v4
+        with:
+          path: jobs.db.gz
+          key: jobs-db-${{ github.run_id }}
+
+      - name: Prepare site
+        run: |
+          mkdir -p _site
+          cp dashboard.html _site/index.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: refresh
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
