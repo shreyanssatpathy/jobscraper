@@ -374,7 +374,11 @@ schedule and publishes the dashboard to GitHub Pages, so the page stays current
 without any machine of yours being on. State carries between runs as a gzipped
 SQLite file in the Actions cache (~15 MB after pruning non-matched payloads);
 without it every run would look like a first crawl and `first_seen_at` would
-reset, which is the whole basis of "new since last time".
+reset, which is the whole basis of "new since last time". On a cold start the
+workflow falls back to `seed/jobs.db.gz`, a committed snapshot of the posting
+history. **The seed carries no description text** — this repository is public
+and job descriptions are copyrighted — only the lifecycle dates and the fields
+already derived from them.
 
 Trigger a run by hand from the Actions tab, or:
 

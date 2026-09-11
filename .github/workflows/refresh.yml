@@ -59,10 +59,17 @@ jobs:
       - name: Unpack database
         run: |
           if [ -f jobs.db.gz ]; then
-            gunzip -kf jobs.db.gz && echo "restored $(du -h jobs.db | cut -f1)"
+            gunzip -kf jobs.db.gz
+            echo "restored from cache: $(du -h jobs.db | cut -f1)"
           else
-            echo "no cached database — this run will behave as a first crawl"
+            # Cold start: fall back to the committed seed so first_seen_at
+            # history survives rather than every posting looking brand new.
+            gunzip -c seed/jobs.db.gz > jobs.db
+            echo "cold start, seeded from seed/jobs.db.gz: $(du -h jobs.db | cut -f1)"
           fi
+
+      - name: Sync board list
+        run: python -m jobscraper.cli import sources.yaml
 
       - name: Poll
         run: |
