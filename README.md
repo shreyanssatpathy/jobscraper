@@ -35,7 +35,7 @@ list call (1 req/board)  →  classify TITLES  →  detail fetch for matches onl
 Python 3.11+. Three dependencies:
 
 ```bash
-pip install httpx pyyaml
+pip install -r requirements.txt
 ```
 
 SQLite ships with Python. `jobs.db` is created on first run.
