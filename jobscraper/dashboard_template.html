@@ -1,0 +1,612 @@
+<title>Data Roles Desk</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --paper:#F2F5F6; --surface:#FFFFFF; --surface-2:#E9EEF0;
+    --ink:#131A1F; --ink-2:#3C4A53; --muted:#65757F; --line:#DCE3E7;
+    --accent:#0E6B75; --accent-soft:#DCEEF0; --accent-ink:#0A5159;
+    --cat-de:#2B6CB0; --cat-ds:#8A4383; --cat-ai:#2F7D52; --cat-an:#9E6F1F;
+    --fresh:#16794F; --fresh-bg:#DFF0E6;
+    --shadow:0 1px 2px rgba(19,26,31,.06), 0 4px 14px rgba(19,26,31,.05);
+    --rail:274px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#0D1317; --surface:#151E24; --surface-2:#1D282F;
+      --ink:#E7EDF0; --ink-2:#B6C4CC; --muted:#8496A1; --line:#243138;
+      --accent:#46B9C4; --accent-soft:#10333A; --accent-ink:#8BD8E0;
+      --cat-de:#6AA8E8; --cat-ds:#CE8FC6; --cat-ai:#6CC08C; --cat-an:#D9AD5B;
+      --fresh:#6CC08C; --fresh-bg:#14312280;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#0D1317; --surface:#151E24; --surface-2:#1D282F;
+    --ink:#E7EDF0; --ink-2:#B6C4CC; --muted:#8496A1; --line:#243138;
+    --accent:#46B9C4; --accent-soft:#10333A; --accent-ink:#8BD8E0;
+    --cat-de:#6AA8E8; --cat-ds:#CE8FC6; --cat-ai:#6CC08C; --cat-an:#D9AD5B;
+    --fresh:#6CC08C; --fresh-bg:#14312280;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  a { color:inherit; }
+  .mono { font-family:"IBM Plex Mono", ui-monospace, monospace; font-variant-numeric:tabular-nums; }
+
+  /* ---------- masthead ---------- */
+  .masthead {
+    border-bottom:1px solid var(--line); background:var(--surface);
+    padding:18px 26px 0;
+  }
+  .mast-top { display:flex; align-items:baseline; gap:16px; flex-wrap:wrap; }
+  h1 {
+    font-family:Archivo, ui-sans-serif, system-ui, sans-serif;
+    font-size:22px; font-weight:700; letter-spacing:-.025em; margin:0;
+    text-wrap:balance;
+  }
+  .stamp { font-size:11.5px; color:var(--muted); letter-spacing:.02em; }
+  .theme-btn {
+    margin-left:auto; border:1px solid var(--line); background:var(--surface-2);
+    color:var(--ink-2); border-radius:7px; padding:5px 11px; cursor:pointer;
+    font:inherit; font-size:12px;
+  }
+  .theme-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+  .figures { display:flex; gap:30px; flex-wrap:wrap; padding:14px 0 16px; }
+  .fig-n {
+    font-family:Archivo, sans-serif; font-size:21px; font-weight:600;
+    letter-spacing:-.02em; font-variant-numeric:tabular-nums; display:block;
+  }
+  .fig-l {
+    font-size:10.5px; text-transform:uppercase; letter-spacing:.09em;
+    color:var(--muted); font-weight:500;
+  }
+  .fig.hot .fig-n { color:var(--accent); }
+
+  /* ---------- shell ---------- */
+  .shell { display:grid; grid-template-columns:var(--rail) minmax(0,1fr); gap:0; align-items:start; }
+  .rail {
+    position:sticky; top:0; max-height:100vh; overflow-y:auto;
+    border-right:1px solid var(--line); padding:20px 20px 60px;
+    background:var(--surface);
+  }
+  .main { padding:20px 26px 80px; min-width:0; }
+
+  .fgroup { margin-bottom:20px; }
+  .fgroup > legend, .flabel {
+    font-size:10.5px; text-transform:uppercase; letter-spacing:.09em;
+    color:var(--muted); font-weight:600; margin-bottom:8px; display:block;
+  }
+  fieldset { border:0; margin:0 0 20px; padding:0; }
+
+  input[type="search"], select {
+    width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:8px;
+    background:var(--paper); color:var(--ink); font:inherit; font-size:13px;
+  }
+  input[type="search"]:focus-visible, select:focus-visible,
+  .chk:focus-within, button:focus-visible {
+    outline:2px solid var(--accent); outline-offset:1px;
+  }
+
+  .chk {
+    display:flex; align-items:center; gap:8px; padding:4px 0;
+    cursor:pointer; font-size:13px; color:var(--ink-2);
+  }
+  .chk input { accent-color:var(--accent); margin:0; width:14px; height:14px; }
+  .chk .ct { margin-left:auto; font-size:11px; color:var(--muted); }
+  .chk:hover { color:var(--ink); }
+
+  .seg { display:flex; flex-wrap:wrap; gap:5px; }
+  .seg button {
+    flex:1 0 auto; padding:6px 9px; font:inherit; font-size:12px;
+    border:1px solid var(--line); background:var(--paper); color:var(--ink-2);
+    border-radius:7px; cursor:pointer;
+  }
+  .seg button[aria-pressed="true"] {
+    background:var(--accent); border-color:var(--accent); color:#fff; font-weight:500;
+  }
+  :root[data-theme="dark"] .seg button[aria-pressed="true"],
+  :root:not([data-theme="light"]) .seg button[aria-pressed="true"] { color:#06181C; }
+
+  .refresh { border:1px solid var(--line); border-radius:10px; padding:13px 13px 11px; background:var(--paper); }
+  .tier { padding:9px 0; border-top:1px solid var(--line); }
+  .tier:first-of-type { border-top:0; padding-top:4px; }
+  .tier-head { display:flex; align-items:center; gap:7px; font-size:13px; }
+  .tier-head b { font-weight:600; }
+  .tier-n { margin-left:auto; font-size:11px; color:var(--muted); }
+  .dot { width:7px; height:7px; border-radius:50%; background:var(--fresh); flex:none; }
+  .tier.stale .dot { background:var(--cat-an); }
+  .tier.old .dot { background:var(--muted); }
+  .tier-age { font-size:11.5px; color:var(--muted); margin:3px 0 7px; }
+  .tier-btn {
+    width:100%; padding:6px; font:inherit; font-size:12px; cursor:pointer;
+    border:1px solid var(--line); border-radius:7px;
+    background:var(--surface); color:var(--ink-2);
+  }
+  .tier-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .tier-btn.copied { background:var(--accent); border-color:var(--accent); color:#fff; }
+  :root[data-theme="dark"] .tier-btn.copied,
+  :root:not([data-theme="light"]) .tier-btn.copied { color:#06181C; }
+  .tier-note { font-size:11px; color:var(--muted); margin:9px 0 0; line-height:1.45; }
+
+  .reset {
+    width:100%; padding:8px; border:1px solid var(--line); background:transparent;
+    color:var(--muted); border-radius:8px; cursor:pointer; font:inherit; font-size:12.5px;
+  }
+  .reset:hover { color:var(--ink); border-color:var(--ink-2); }
+
+  /* ---------- results ---------- */
+  .bar {
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    padding-bottom:12px; margin-bottom:4px; border-bottom:1px solid var(--line);
+  }
+  .count { font-size:13px; color:var(--muted); }
+  .count b { color:var(--ink); font-weight:600; }
+  .bar label { font-size:12px; color:var(--muted); margin-left:auto; }
+  .bar select { width:auto; padding:5px 8px; font-size:12.5px; }
+
+  .rows { display:flex; flex-direction:column; gap:1px; margin-top:14px; }
+  .row {
+    display:grid; grid-template-columns:3px minmax(0,1fr) auto; gap:0 14px;
+    background:var(--surface); border:1px solid var(--line); border-radius:9px;
+    padding:0; overflow:hidden; align-items:center;
+  }
+  .row + .row { margin-top:6px; }
+  .row:hover { border-color:var(--ink-2); }
+  .row.is-applied { opacity:.55; }
+  .stripe { align-self:stretch; background:var(--sc, var(--muted)); }
+  .body { padding:11px 0 11px 2px; min-width:0; }
+  .actions { display:flex; gap:4px; padding:0 12px 0 0; }
+
+  .rt {
+    font-weight:600; font-size:14.5px; letter-spacing:-.005em; margin:0 0 3px;
+    display:block; text-decoration:none; color:var(--ink);
+  }
+  .rt:hover { color:var(--accent); text-decoration:underline; text-underline-offset:2px; }
+  .meta { display:flex; flex-wrap:wrap; gap:0 9px; align-items:center; font-size:12.5px; color:var(--muted); }
+  .co { color:var(--ink-2); font-weight:500; }
+  .sep { opacity:.4; }
+  .cat {
+    font-size:10.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--sc); white-space:nowrap;
+  }
+  .h1b {
+    font-size:10.5px; font-weight:600; padding:1px 5px; border-radius:4px;
+    background:var(--accent-soft); color:var(--accent-ink); white-space:nowrap;
+  }
+  .new {
+    font-size:10.5px; font-weight:600; padding:1px 6px; border-radius:4px;
+    background:var(--fresh-bg); color:var(--fresh); white-space:nowrap;
+  }
+  .pay { color:var(--ink-2); font-weight:500; }
+  .intl { color:var(--cat-an); }
+  .unk { font-style:italic; opacity:.8; }
+
+  .act {
+    border:1px solid var(--line); background:var(--paper); color:var(--muted);
+    border-radius:6px; width:28px; height:28px; cursor:pointer; font-size:13px;
+    display:grid; place-items:center; padding:0;
+  }
+  .act:hover { border-color:var(--accent); color:var(--accent); }
+  .act[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:#fff; }
+  :root[data-theme="dark"] .act[aria-pressed="true"],
+  :root:not([data-theme="light"]) .act[aria-pressed="true"] { color:#06181C; }
+
+  .empty { padding:50px 20px; text-align:center; color:var(--muted); }
+  .more {
+    margin:18px auto 0; display:block; padding:9px 20px; border-radius:8px;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+    cursor:pointer; font:inherit; font-size:13px;
+  }
+  .more:hover { border-color:var(--accent); color:var(--accent); }
+  .sync { font-size:11.5px; color:var(--muted); padding-top:14px; border-top:1px solid var(--line); margin-top:6px; }
+
+  @media (max-width: 880px) {
+    .shell { grid-template-columns:1fr; }
+    .rail { position:static; max-height:none; border-right:0; border-bottom:1px solid var(--line); }
+    .main { padding:18px 16px 60px; }
+    .masthead { padding:16px 16px 0; }
+    .row { grid-template-columns:3px minmax(0,1fr); }
+    .actions { grid-column:2; padding:0 0 11px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; } }
+</style>
+
+<header class="masthead">
+  <div class="mast-top">
+    <h1>Data Roles Desk</h1>
+    <span class="stamp mono" id="stamp"></span>
+    <button class="theme-btn" id="themeBtn" type="button">Theme</button>
+  </div>
+  <div class="figures">
+    <div class="fig hot"><span class="fig-n mono" id="f24">—</span><span class="fig-l">posted 24h</span></div>
+    <div class="fig"><span class="fig-n mono" id="f7">—</span><span class="fig-l">posted 7 days</span></div>
+    <div class="fig"><span class="fig-n mono" id="fOpen">—</span><span class="fig-l">US open roles</span></div>
+    <div class="fig"><span class="fig-n mono" id="fCo">—</span><span class="fig-l">US companies</span></div>
+    <div class="fig"><span class="fig-n mono" id="fSp">—</span><span class="fig-l">top-100 sponsors</span></div>
+    <div class="fig"><span class="fig-n mono" id="fTracked">—</span><span class="fig-l">postings scanned</span></div>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="rail">
+    <section class="fgroup refresh">
+      <span class="flabel">Data freshness</span>
+      <div class="tier" id="tier-tier1">
+        <div class="tier-head">
+          <span class="dot"></span><b>Tier 1</b>
+          <span class="tier-n mono"></span>
+        </div>
+        <div class="tier-age mono"></div>
+        <button class="tier-btn" type="button"
+                data-cmd="python -m jobscraper.cli poll --only greenhouse ashby lever smartrecruiters recruitee rippling breezy bamboohr &amp;&amp; python -m jobscraper.cli dashboard">Copy refresh command</button>
+      </div>
+      <div class="tier" id="tier-workday">
+        <div class="tier-head">
+          <span class="dot"></span><b>Workday</b>
+          <span class="tier-n mono"></span>
+        </div>
+        <div class="tier-age mono"></div>
+        <button class="tier-btn" type="button"
+                data-cmd="python -m jobscraper.cli poll --only workday &amp;&amp; python -m jobscraper.cli dashboard">Copy refresh command</button>
+      </div>
+      <p class="tier-note">Runs on your machine — this page is a published
+        snapshot and can't reach your laptop. Paste into the project folder,
+        then ask Claude to republish.</p>
+    </section>
+
+    <fieldset class="fgroup">
+      <legend>Search</legend>
+      <input type="search" id="q" placeholder="Title or company…" autocomplete="off">
+    </fieldset>
+
+    <fieldset class="fgroup">
+      <legend>Posted within</legend>
+      <div class="seg" id="win">
+        <button type="button" data-w="24" aria-pressed="false">24h</button>
+        <button type="button" data-w="48" aria-pressed="false">48h</button>
+        <button type="button" data-w="168" aria-pressed="false">7d</button>
+        <button type="button" data-w="720" aria-pressed="false">30d</button>
+        <button type="button" data-w="0" aria-pressed="true">Any</button>
+      </div>
+    </fieldset>
+
+    <fieldset class="fgroup">
+      <legend>Role family</legend>
+      <div id="cats"></div>
+    </fieldset>
+
+    <fieldset class="fgroup">
+      <legend>Max experience asked</legend>
+      <select id="exp">
+        <option value="">Any</option>
+        <option value="2">2 years or less</option>
+        <option value="3" selected>3 years or less</option>
+        <option value="4">4 years or less</option>
+        <option value="5">5 years or less</option>
+      </select>
+      <label class="chk" style="margin-top:7px">
+        <input type="checkbox" id="strictExp"> Only if stated in the posting
+      </label>
+    </fieldset>
+
+    <fieldset class="fgroup">
+      <legend>Seniority</legend>
+      <div id="sens"></div>
+    </fieldset>
+
+    <fieldset class="fgroup">
+      <legend>Location</legend>
+      <select id="loc">
+        <option value="us" selected>United States only</option>
+        <option value="usq">US, plus unresolved locations</option>
+        <option value="intl">Outside the US</option>
+        <option value="any">Anywhere</option>
+      </select>
+    </fieldset>
+
+    <fieldset class="fgroup">
+      <legend>Filters</legend>
+      <label class="chk"><input type="checkbox" id="ft" checked> Full-time only</label>
+      <label class="chk"><input type="checkbox" id="rm"> Remote only</label>
+      <label class="chk"><input type="checkbox" id="sp"> Top-100 H-1B sponsors</label>
+    </fieldset>
+
+    <fieldset class="fgroup">
+      <legend>My status</legend>
+      <select id="st">
+        <option value="all">Everything except dismissed</option>
+        <option value="none">Not yet triaged</option>
+        <option value="star">Shortlisted</option>
+        <option value="applied">Applied</option>
+        <option value="dismissed">Dismissed</option>
+        <option value="every">Include dismissed</option>
+      </select>
+    </fieldset>
+
+    <button class="reset" id="reset" type="button">Reset filters</button>
+    <p class="sync" id="sync">Shortlist saved on this device.</p>
+  </aside>
+
+  <main class="main">
+    <div class="bar">
+      <span class="count" id="count">—</span>
+      <label for="sort">Sort</label>
+      <select id="sort">
+        <option value="posted">Newest posted</option>
+        <option value="found">Recently discovered</option>
+        <option value="pay">Highest pay</option>
+        <option value="h1b">Most H-1B approvals</option>
+        <option value="exp">Least experience asked</option>
+      </select>
+    </div>
+    <div class="rows" id="rows"></div>
+    <button class="more" id="more" hidden type="button">Show more</button>
+  </main>
+</div>
+
+<script>
+const JOBS = /*__JOBS__*/[];
+const META = /*__META__*/{};
+const F = { ID:0, TITLE:1, CO:2, CAT:3, SEN:4, EXP:5, LOC:6, REMOTE:7, SMIN:8,
+            SMAX:9, TYPE:10, POSTED:11, FOUND:12, URL:13, H1B:14, US:15 };
+
+const CAT_LABEL = { data_engineer:"Data Eng", data_scientist:"Data Sci",
+                    ai_engineer:"AI / ML", analytics:"Analytics" };
+const CAT_VAR = { data_engineer:"--cat-de", data_scientist:"--cat-ds",
+                  ai_engineer:"--cat-ai", analytics:"--cat-an" };
+const SEN_LABEL = { intern:"Intern", new_grad:"New grad", junior:"Junior", mid:"Mid",
+                    senior:"Senior", staff:"Staff / Principal", manager:"Manager+" };
+const SEN_ORDER = ["new_grad","junior","mid","senior","staff","manager","intern"];
+const NOT_FT = /intern|part.?time|contract|tempor|seasonal|co.?op/i;
+
+/* ---------- status store: db when granted, this device otherwise ---------- */
+const LS = "jobdesk.status.v1";
+let status = {};
+let db = null;
+try { status = JSON.parse(localStorage.getItem(LS) || "{}"); } catch (e) { status = {}; }
+
+function persist(id, state) {
+  if (state) status[id] = state; else delete status[id];
+  try { localStorage.setItem(LS, JSON.stringify(status)); } catch (e) {}
+  if (db) {
+    const doc = db.doc("status/" + id);
+    (state ? doc.set({ state, at: new Date().toISOString() }) : doc.delete())
+      .catch(() => {});
+  }
+}
+
+(async () => {
+  if (!window.claude || !claude.use) return;
+  const ns = await claude.use("db").catch(() => null);
+  if (!ns) return;
+  db = ns;
+  try {
+    const snap = await db.collection("status").get();
+    const docs = snap && (snap.docs || snap) || [];
+    docs.forEach(d => {
+      const id = d.id || (d.ref && d.ref.id);
+      const val = typeof d.data === "function" ? d.data() : d.data;
+      if (id && val && val.state) status[id] = val.state;
+    });
+    try { localStorage.setItem(LS, JSON.stringify(status)); } catch (e) {}
+    document.getElementById("sync").textContent =
+      "Shortlist synced across your devices.";
+    render();
+  } catch (e) { /* keep the local copy */ }
+})();
+
+/* ---------- filter state ---------- */
+const S = { q:"", win:0, cats:new Set(), sens:new Set(), exp:"3", strict:false,
+            ft:true, rm:false, sp:false, loc:"us", st:"all", sort:"posted", limit:60 };
+
+const $ = id => document.getElementById(id);
+const hoursAgo = d => d ? (Date.now() - new Date(d + "T12:00:00Z").getTime()) / 36e5 : Infinity;
+
+function counts(field) {
+  const m = {};
+  JOBS.forEach(j => { const v = j[field]; if (v) m[v] = (m[v] || 0) + 1; });
+  return m;
+}
+
+function buildChecks(host, map, order, set, labels) {
+  order.filter(k => map[k]).forEach(k => {
+    const l = document.createElement("label");
+    l.className = "chk";
+    l.innerHTML = `<input type="checkbox" value="${k}"><span>${labels[k] || k}</span>` +
+                  `<span class="ct mono">${map[k]}</span>`;
+    l.querySelector("input").addEventListener("change", e => {
+      e.target.checked ? set.add(k) : set.delete(k);
+      S.limit = 60; render();
+    });
+    host.appendChild(l);
+  });
+}
+
+function passes(j) {
+  if (S.q) {
+    const hay = (j[F.TITLE] + " " + j[F.CO] + " " + (j[F.LOC] || "")).toLowerCase();
+    if (!S.q.split(/\s+/).every(t => hay.includes(t))) return false;
+  }
+  if (S.win && hoursAgo(j[F.POSTED]) > S.win) return false;
+  if (S.cats.size && !S.cats.has(j[F.CAT])) return false;
+  if (S.sens.size && !S.sens.has(j[F.SEN])) return false;
+  if (S.exp) {
+    const e = j[F.EXP];
+    if (e === null || e === undefined) { if (S.strict) return false; }
+    else if (e > +S.exp) return false;
+  }
+  if (S.ft) {
+    if (j[F.SEN] === "intern") return false;
+    if (j[F.TYPE] && NOT_FT.test(j[F.TYPE])) return false;
+  }
+  if (S.loc === "us" && j[F.US] !== 1) return false;
+  if (S.loc === "usq" && j[F.US] === 0) return false;
+  if (S.loc === "intl" && j[F.US] === 1) return false;
+  if (S.rm && !j[F.REMOTE]) return false;
+  if (S.sp && !j[F.H1B]) return false;
+  const st = status[j[F.ID]];
+  if (S.st === "all") { if (st === "dismissed") return false; }
+  else if (S.st === "none") { if (st) return false; }
+  else if (S.st !== "every" && st !== S.st) return false;
+  return true;
+}
+
+const SORTS = {
+  posted: (a,b) => (b[F.POSTED] || "").localeCompare(a[F.POSTED] || ""),
+  found:  (a,b) => (b[F.FOUND] || "").localeCompare(a[F.FOUND] || ""),
+  pay:    (a,b) => (b[F.SMAX] || b[F.SMIN] || 0) - (a[F.SMAX] || a[F.SMIN] || 0),
+  h1b:    (a,b) => (b[F.H1B] || 0) - (a[F.H1B] || 0),
+  exp:    (a,b) => (a[F.EXP] === null ? 99 : a[F.EXP]) - (b[F.EXP] === null ? 99 : b[F.EXP]),
+};
+
+const money = n => n >= 1000 ? "$" + Math.round(n/1000) + "K" : "$" + n;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function rowHTML(j) {
+  const cat = j[F.CAT], st = status[j[F.ID]];
+  const hrs = hoursAgo(j[F.POSTED]);
+  const bits = [];
+  bits.push(`<span class="co">${esc(j[F.CO])}</span>`);
+  if (j[F.H1B]) bits.push(`<span class="h1b mono">H-1B ${j[F.H1B].toLocaleString()}</span>`);
+  bits.push(`<span class="sep">·</span><span class="cat">${CAT_LABEL[cat] || cat}</span>`);
+  if (j[F.LOC]) {
+    const intl = j[F.US] === 0 ? ' class="intl"' : (j[F.US] === null || j[F.US] === undefined ? ' class="unk"' : "");
+    bits.push(`<span class="sep">·</span><span${intl}>${esc(j[F.LOC].slice(0,58))}</span>`);
+  }
+  bits.push(`<span class="sep">·</span><span>${SEN_LABEL[j[F.SEN]] || j[F.SEN]}</span>`);
+  bits.push(`<span class="sep">·</span><span class="mono">${
+    j[F.EXP] === null || j[F.EXP] === undefined ? "yrs n/s" : j[F.EXP] + "+ yrs"}</span>`);
+  if (j[F.SMIN]) bits.push(`<span class="sep">·</span><span class="pay mono">${money(j[F.SMIN])}${
+    j[F.SMAX] ? "–" + money(j[F.SMAX]) : ""}</span>`);
+  bits.push(`<span class="sep">·</span><span class="mono">${j[F.POSTED] || "date n/s"}</span>`);
+  if (hrs <= 48) bits.push(`<span class="new">NEW</span>`);
+
+  return `<article class="row ${st === "applied" ? "is-applied" : ""}" style="--sc:var(${CAT_VAR[cat] || "--muted"})">
+    <div class="stripe"></div>
+    <div class="body">
+      <a class="rt" href="${esc(j[F.URL] || "#")}" target="_blank" rel="noopener">${esc(j[F.TITLE])}</a>
+      <div class="meta">${bits.join("")}</div>
+    </div>
+    <div class="actions">
+      <button class="act" data-id="${j[F.ID]}" data-s="star" aria-pressed="${st === "star"}"
+              title="Shortlist">★</button>
+      <button class="act" data-id="${j[F.ID]}" data-s="applied" aria-pressed="${st === "applied"}"
+              title="Applied">✓</button>
+      <button class="act" data-id="${j[F.ID]}" data-s="dismissed" aria-pressed="${st === "dismissed"}"
+              title="Dismiss">✕</button>
+    </div>
+  </article>`;
+}
+
+function render() {
+  const list = JOBS.filter(passes).sort(SORTS[S.sort]);
+  const shown = list.slice(0, S.limit);
+  $("rows").innerHTML = shown.length
+    ? shown.map(rowHTML).join("")
+    : `<p class="empty">No roles match these filters. Try widening the date window or experience cap.</p>`;
+  $("count").innerHTML = `<b>${list.length.toLocaleString()}</b> role${list.length === 1 ? "" : "s"}` +
+    (list.length > shown.length ? ` · showing ${shown.length}` : "");
+  $("more").hidden = list.length <= S.limit;
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest(".act");
+  if (!b) return;
+  const id = b.dataset.id, want = b.dataset.s;
+  persist(id, status[id] === want ? null : want);
+  render();
+});
+
+$("more").addEventListener("click", () => { S.limit += 60; render(); });
+$("q").addEventListener("input", e => { S.q = e.target.value.trim().toLowerCase(); S.limit = 60; render(); });
+$("exp").addEventListener("change", e => { S.exp = e.target.value; S.limit = 60; render(); });
+$("strictExp").addEventListener("change", e => { S.strict = e.target.checked; render(); });
+["ft","rm","sp"].forEach(k => $(k).addEventListener("change", e => { S[k] = e.target.checked; S.limit = 60; render(); }));
+$("loc").addEventListener("change", e => { S.loc = e.target.value; S.limit = 60; render(); });
+$("st").addEventListener("change", e => { S.st = e.target.value; S.limit = 60; render(); });
+$("sort").addEventListener("change", e => { S.sort = e.target.value; render(); });
+$("win").addEventListener("click", e => {
+  const b = e.target.closest("button[data-w]");
+  if (!b) return;
+  [...$("win").children].forEach(x => x.setAttribute("aria-pressed", x === b));
+  S.win = +b.dataset.w; S.limit = 60; render();
+});
+$("reset").addEventListener("click", () => {
+  S.q = ""; S.win = 0; S.cats.clear(); S.sens.clear(); S.exp = "3"; S.strict = false;
+  S.ft = true; S.rm = false; S.sp = false; S.st = "all"; S.limit = 60;
+  $("q").value = ""; $("exp").value = "3"; $("strictExp").checked = false;
+  // Clear only the generated category/seniority boxes -- a broader selector
+  // would also wipe the toggles set on the next line.
+  document.querySelectorAll("#cats input, #sens input").forEach(i => { i.checked = false; });
+  $("ft").checked = true; $("rm").checked = false; $("sp").checked = false;
+  S.loc = "us"; $("loc").value = "us"; $("st").value = "all";
+  [...$("win").children].forEach(x => x.setAttribute("aria-pressed", x.dataset.w === "0"));
+  render();
+});
+
+/* ---------- per-tier freshness + copyable refresh commands ---------- */
+const TIER_META = {
+  tier1:   { label:"Tier 1",  typical:"about 20s when nothing changed", warnH:1 },
+  workday: { label:"Workday", typical:"about 5 min, every time",        warnH:6 },
+};
+function ago(iso) {
+  if (!iso) return "never polled";
+  const h = (Date.now() - new Date(iso).getTime()) / 36e5;
+  if (h < 1) return Math.max(1, Math.round(h * 60)) + " min ago";
+  if (h < 48) return Math.round(h) + "h ago";
+  return Math.round(h / 24) + "d ago";
+}
+Object.entries(TIER_META).forEach(([key, cfg]) => {
+  const el = $("tier-" + key), info = (META.tiers || {})[key] || {};
+  if (!el) return;
+  el.querySelector(".tier-n").textContent = (info.boards || 0) + " boards";
+  el.querySelector(".tier-age").textContent = ago(info.lastPoll) + " · takes " + cfg.typical;
+  const h = info.lastPoll ? (Date.now() - new Date(info.lastPoll).getTime()) / 36e5 : 1e6;
+  el.classList.toggle("stale", h > cfg.warnH && h <= cfg.warnH * 6);
+  el.classList.toggle("old", h > cfg.warnH * 6);
+});
+document.addEventListener("click", async e => {
+  const b = e.target.closest(".tier-btn");
+  if (!b) return;
+  const cmd = b.dataset.cmd;
+  try { await navigator.clipboard.writeText(cmd); }
+  catch (err) {
+    const t = document.createElement("textarea");
+    t.value = cmd; document.body.appendChild(t); t.select();
+    try { document.execCommand("copy"); } catch (e2) {}
+    t.remove();
+  }
+  b.classList.add("copied"); b.textContent = "Copied";
+  setTimeout(() => { b.classList.remove("copied"); b.textContent = "Copy refresh command"; }, 1600);
+});
+
+const themeBtn = $("themeBtn");
+themeBtn.addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme");
+  const dark = cur ? cur === "dark"
+    : matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+});
+
+/* ---------- boot ---------- */
+buildChecks($("cats"), counts(F.CAT), ["ai_engineer","data_scientist","data_engineer","analytics"], S.cats, CAT_LABEL);
+buildChecks($("sens"), counts(F.SEN), SEN_ORDER, S.sens, SEN_LABEL);
+
+const USJOBS = JOBS.filter(j => j[F.US] === 1);
+$("fOpen").textContent = USJOBS.length.toLocaleString();
+$("fCo").textContent = new Set(USJOBS.map(j => j[F.CO])).size;
+$("fSp").textContent = META.sponsors ?? "—";
+$("fTracked").textContent = (META.tracked || 0).toLocaleString();
+$("f24").textContent = USJOBS.filter(j => hoursAgo(j[F.POSTED]) <= 24).length;
+$("f7").textContent = USJOBS.filter(j => hoursAgo(j[F.POSTED]) <= 168).length;
+$("stamp").textContent = META.generated
+  ? "snapshot " + META.generated.replace("T", " ").replace("+00:00", " UTC")
+  : "";
+render();
+</script>

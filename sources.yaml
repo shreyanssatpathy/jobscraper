@@ -1,0 +1,163 @@
+# Boards verified live. Tier 1 = one GET per board; Tier 2 (workday) = POST,
+# 20/page, no ETag, polled every 6h.
+# h1b_approvals = USCIS approvals FY2020-24 (top-100 sponsor list), matched on
+# exact whole-word company identity. Absence means 'not in the top 100',
+# NOT 'does not sponsor'. Broadcom carries VMware's filings after the acquisition.
+# Companies listed in blocklist.yaml are refused on import and never appear here.
+sources:
+  - { ats: workday, token: salesforce, company: "Salesforce", h1b_approvals: 5059, poll_interval_s: 21600, config: { host: salesforce.wd12.myworkdayjobs.com, site: External_Career_Site } }
+  - { ats: workday, token: adobe, company: "Adobe", h1b_approvals: 2607, poll_interval_s: 21600, config: { host: adobe.wd5.myworkdayjobs.com, site: external_experienced } }
+  - { ats: smartrecruiters, token: servicenow, company: "ServiceNow", h1b_approvals: 2085 }
+  - { ats: workday, token: paloaltonetworks, company: "Palo Alto Networks", h1b_approvals: 1822, poll_interval_s: 21600, config: { host: paloaltonetworks.wd5.myworkdayjobs.com, site: panwexternalcareers } }
+  - { ats: workday, token: hpe, company: "HPE", h1b_approvals: 1395, poll_interval_s: 21600, config: { host: hpe.wd5.myworkdayjobs.com, site: Jobsathpe } }
+  - { ats: workday, token: broadcom, company: "Broadcom (VMware)", h1b_approvals: 1126, poll_interval_s: 21600, config: { host: broadcom.wd1.myworkdayjobs.com, site: External_Career } }
+  - { ats: greenhouse, token: databricks, company: "Databricks", h1b_approvals: 1107 }
+  - { ats: workday, token: amgen, company: "Amgen", h1b_approvals: 1070, poll_interval_s: 21600, config: { host: amgen.wd1.myworkdayjobs.com, site: Careers } }
+  - { ats: workday, token: workday, company: "Workday", h1b_approvals: 1028, poll_interval_s: 21600, config: { host: workday.wd5.myworkdayjobs.com, site: Workday } }
+  - { ats: smartrecruiters, token: thebostonconsultinggroup, company: "Boston Consulting Group", h1b_approvals: 818 }
+  - { ats: workday, token: autodesk, company: "Autodesk", h1b_approvals: 775, poll_interval_s: 21600, config: { host: autodesk.wd1.myworkdayjobs.com, site: EXT } }
+  - { ats: workday, token: gilead, company: "Gilead Sciences", h1b_approvals: 659, poll_interval_s: 21600, config: { host: gilead.wd1.myworkdayjobs.com, site: GileadCareers } }
+  - { ats: workday, token: thermofisher, company: "Thermo Fisher Scientific", h1b_approvals: 641, poll_interval_s: 21600, config: { host: thermofisher.wd5.myworkdayjobs.com, site: ThermofisherCareers } }
+  - { ats: greenhouse, token: waymo, company: "Waymo", h1b_approvals: 575 }
+  - { ats: ashby, token: abridge, company: "Abridge" }
+  - { ats: ashby, token: acorns, company: "Acorns" }
+  - { ats: greenhouse, token: affirm, company: "Affirm" }
+  - { ats: greenhouse, token: airbnb, company: "Airbnb" }
+  - { ats: greenhouse, token: airtable, company: "Airtable" }
+  - { ats: ashby, token: aleph, company: "Aleph" }
+  - { ats: greenhouse, token: alpaca, company: "Alpaca" }
+  - { ats: greenhouse, token: amplitude, company: "Amplitude" }
+  - { ats: greenhouse, token: anthropic, company: "Anthropic" }
+  - { ats: ashby, token: anyscale, company: "Anyscale" }
+  - { ats: greenhouse, token: asana, company: "Asana" }
+  - { ats: ashby, token: astronomer, company: "Astronomer" }
+  - { ats: workday, token: att, company: "AT&T", poll_interval_s: 21600, config: { host: att.wd1.myworkdayjobs.com, site: ATTGeneral } }
+  - { ats: ashby, token: atlan, company: "Atlan" }
+  - { ats: ashby, token: baseten, company: "Baseten" }
+  - { ats: ashby, token: benchling, company: "Benchling" }
+  - { ats: greenhouse, token: brex, company: "Brex" }
+  - { ats: greenhouse, token: carta, company: "Carta" }
+  - { ats: greenhouse, token: chime, company: "Chime" }
+  - { ats: workday, token: cigna, company: "Cigna", poll_interval_s: 21600, config: { host: cigna.wd5.myworkdayjobs.com, site: cignacareers } }
+  - { ats: workday, token: cisco, company: "Cisco", poll_interval_s: 21600, config: { host: cisco.wd5.myworkdayjobs.com, site: Cisco_Careers } }
+  - { ats: ashby, token: clickhouse, company: "ClickHouse" }
+  - { ats: ashby, token: clickup, company: "ClickUp" }
+  - { ats: greenhouse, token: cloudflare, company: "Cloudflare" }
+  - { ats: greenhouse, token: cockroachlabs, company: "Cockroach Labs" }
+  - { ats: ashby, token: cohere, company: "Cohere" }
+  - { ats: greenhouse, token: coinbase, company: "Coinbase" }
+  - { ats: greenhouse, token: collibra, company: "Collibra" }
+  - { ats: ashby, token: confluent, company: "Confluent" }
+  - { ats: greenhouse, token: cresta, company: "Cresta" }
+  - { ats: ashby, token: crusoe, company: "Crusoe" }
+  - { ats: ashby, token: cursor, company: "Cursor" }
+  - { ats: greenhouse, token: datadog, company: "Datadog" }
+  - { ats: ashby, token: decagon, company: "Decagon" }
+  - { ats: greenhouse, token: discord, company: "Discord" }
+  - { ats: greenhouse, token: dotmatics, company: "Dotmatics" }
+  - { ats: greenhouse, token: dropbox, company: "Dropbox" }
+  - { ats: greenhouse, token: duolingo, company: "Duolingo" }
+  - { ats: greenhouse, token: elastic, company: "Elastic" }
+  - { ats: workday, token: elevancehealth, company: "Elevance", poll_interval_s: 21600, config: { host: elevancehealth.wd1.myworkdayjobs.com, site: ANT } }
+  - { ats: greenhouse, token: faire, company: "Faire" }
+  - { ats: greenhouse, token: fastly, company: "Fastly" }
+  - { ats: greenhouse, token: figma, company: "Figma" }
+  - { ats: greenhouse, token: fireblocks, company: "Fireblocks" }
+  - { ats: greenhouse, token: fivetran, company: "Fivetran" }
+  - { ats: greenhouse, token: flatironhealth, company: "Flatiron Health" }
+  - { ats: greenhouse, token: flexport, company: "Flexport" }
+  - { ats: greenhouse, token: fourkites, company: "Fourkites" }
+  - { ats: ashby, token: fullstory, company: "Fullstory" }
+  - { ats: greenhouse, token: gemini, company: "Gemini" }
+  - { ats: greenhouse, token: gitlab, company: "GitLab" }
+  - { ats: greenhouse, token: gusto, company: "Gusto" }
+  - { ats: ashby, token: harvey, company: "Harvey" }
+  - { ats: lever, token: hevodata, company: "Hevodata" }
+  - { ats: ashby, token: hex, company: "Hex" }
+  - { ats: greenhouse, token: honeycomb, company: "Honeycomb" }
+  - { ats: ashby, token: insitro, company: "Insitro" }
+  - { ats: greenhouse, token: instacart, company: "Instacart" }
+  - { ats: greenhouse, token: justworks, company: "Justworks" }
+  - { ats: greenhouse, token: kodiak, company: "Kodiak" }
+  - { ats: greenhouse, token: komodohealth, company: "Komodo Health" }
+  - { ats: greenhouse, token: labelbox, company: "Labelbox" }
+  - { ats: ashby, token: langchain, company: "Langchain" }
+  - { ats: greenhouse, token: launchdarkly, company: "Launchdarkly" }
+  - { ats: ashby, token: lightdash, company: "Lightdash" }
+  - { ats: ashby, token: linear, company: "Linear" }
+  - { ats: greenhouse, token: lyft, company: "Lyft" }
+  - { ats: workday, token: mastercard, company: "Mastercard", poll_interval_s: 21600, config: { host: mastercard.wd1.myworkdayjobs.com, site: CorporateCareers } }
+  - { ats: lever, token: matillion, company: "Matillion" }
+  - { ats: greenhouse, token: mercari, company: "Mercari" }
+  - { ats: workday, token: msd, company: "Merck", poll_interval_s: 21600, config: { host: msd.wd5.myworkdayjobs.com, site: SearchJobs } }
+  - { ats: greenhouse, token: mercury, company: "Mercury" }
+  - { ats: lever, token: metabase, company: "Metabase" }
+  - { ats: workday, token: micron, company: "Micron", poll_interval_s: 21600, config: { host: micron.wd1.myworkdayjobs.com, site: External } }
+  - { ats: ashby, token: miro, company: "Miro" }
+  - { ats: greenhouse, token: mixpanel, company: "Mixpanel" }
+  - { ats: greenhouse, token: modernhealth, company: "Modern Health" }
+  - { ats: greenhouse, token: mongodb, company: "MongoDB" }
+  - { ats: ashby, token: montecarlodata, company: "Monte Carlo" }
+  - { ats: greenhouse, token: neo4j, company: "Neo4j" }
+  - { ats: ashby, token: nerdwallet, company: "NerdWallet" }
+  - { ats: greenhouse, token: netradyne, company: "Netradyne" }
+  - { ats: workday, token: nike, company: "Nike", poll_interval_s: 21600, config: { host: nike.wd1.myworkdayjobs.com, site: nke } }
+  - { ats: ashby, token: notion, company: "Notion" }
+  - { ats: greenhouse, token: nuro, company: "Nuro" }
+  - { ats: workday, token: nvidia, company: "NVIDIA", poll_interval_s: 21600, config: { host: nvidia.wd5.myworkdayjobs.com, site: NVIDIAExternalCareerSite } }
+  - { ats: greenhouse, token: observeai, company: "Observeai" }
+  - { ats: ashby, token: omni, company: "Omni" }
+  - { ats: ashby, token: openai, company: "OpenAI" }
+  - { ats: ashby, token: openevidence, company: "Openevidence" }
+  - { ats: greenhouse, token: oura, company: "Oura" }
+  - { ats: ashby, token: oyster, company: "Oyster" }
+  - { ats: greenhouse, token: peloton, company: "Peloton" }
+  - { ats: greenhouse, token: pendo, company: "Pendo" }
+  - { ats: ashby, token: perplexity, company: "Perplexity" }
+  - { ats: workday, token: pfizer, company: "Pfizer", poll_interval_s: 21600, config: { host: pfizer.wd1.myworkdayjobs.com, site: PfizerCareers } }
+  - { ats: ashby, token: pinecone, company: "Pinecone" }
+  - { ats: ashby, token: plaid, company: "Plaid" }
+  - { ats: ashby, token: poolside, company: "Poolside" }
+  - { ats: ashby, token: poshmark, company: "Poshmark" }
+  - { ats: ashby, token: posthog, company: "Posthog" }
+  - { ats: greenhouse, token: postman, company: "Postman" }
+  - { ats: ashby, token: prefect, company: "Prefect" }
+  - { ats: greenhouse, token: project44, company: "Project44" }
+  - { ats: ashby, token: ramp, company: "Ramp" }
+  - { ats: workday, token: redhat, company: "Red Hat", poll_interval_s: 21600, config: { host: redhat.wd5.myworkdayjobs.com, site: jobs } }
+  - { ats: greenhouse, token: reddit, company: "Reddit" }
+  - { ats: ashby, token: rho, company: "Rho" }
+  - { ats: greenhouse, token: robinhood, company: "Robinhood" }
+  - { ats: workday, token: spgi, company: "S&P Global", poll_interval_s: 21600, config: { host: spgi.wd5.myworkdayjobs.com, site: SPGI_Careers } }
+  - { ats: greenhouse, token: samsara, company: "Samsara" }
+  - { ats: ashby, token: saronic, company: "Saronic" }
+  - { ats: greenhouse, token: scaleai, company: "Scale AI" }
+  - { ats: ashby, token: sentry, company: "Sentry" }
+  - { ats: greenhouse, token: sezzle, company: "Sezzle" }
+  - { ats: ashby, token: shield-ai, company: "Shield AI" }
+  - { ats: ashby, token: sierra, company: "Sierra" }
+  - { ats: greenhouse, token: sigmacomputing, company: "Sigma Computing" }
+  - { ats: greenhouse, token: singlestore, company: "SingleStore" }
+  - { ats: ashby, token: skydio, company: "Skydio" }
+  - { ats: ashby, token: snowflake, company: "Snowflake" }
+  - { ats: greenhouse, token: sofi, company: "SoFi" }
+  - { ats: lever, token: spotify, company: "Spotify" }
+  - { ats: greenhouse, token: squarespace, company: "Squarespace" }
+  - { ats: greenhouse, token: starburst, company: "Starburst" }
+  - { ats: ashby, token: strava, company: "Strava" }
+  - { ats: greenhouse, token: stripe, company: "Stripe" }
+  - { ats: ashby, token: supabase, company: "Supabase" }
+  - { ats: workday, token: target, company: "Target", poll_interval_s: 21600, config: { host: target.wd5.myworkdayjobs.com, site: targetcareers } }
+  - { ats: workday, token: travelers, company: "Travelers", poll_interval_s: 21600, config: { host: travelers.wd5.myworkdayjobs.com, site: External } }
+  - { ats: greenhouse, token: twilio, company: "Twilio" }
+  - { ats: greenhouse, token: vercel, company: "Vercel" }
+  - { ats: greenhouse, token: verkada, company: "Verkada" }
+  - { ats: workday, token: visa, company: "Visa", poll_interval_s: 21600, config: { host: visa.wd5.myworkdayjobs.com, site: Visa } }
+  - { ats: greenhouse, token: vonage, company: "Vonage" }
+  - { ats: ashby, token: vultr, company: "Vultr" }
+  - { ats: lever, token: wealthfront, company: "Wealthfront" }
+  - { ats: ashby, token: weaviate, company: "Weaviate" }
+  - { ats: greenhouse, token: webflow, company: "Webflow" }
+  - { ats: ashby, token: whoop, company: "WHOOP" }
+  - { ats: greenhouse, token: wing, company: "Wing" }
+  - { ats: ashby, token: zip, company: "Zip" }

@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+
+# local state and generated output
+jobs.db*
+.poll.lock
+poll.log
+dashboard.html
+*.csv
+
+# macOS
+.DS_Store

@@ -1,0 +1,71 @@
+# Companies never to track, matched on whole-word normalised name.
+# `import`, `add` and `discover` all refuse these, so a future sponsor-list
+# import cannot quietly reintroduce them.
+#
+# Rationale: IT services, outsourcing and staffing firms hire through a
+# body-shop model that Shreyans does not want to apply into.
+blocked:
+  # --- IT services / outsourcing ---
+  - Accenture
+  - Cognizant
+  - Tata Consultancy
+  - TCS
+  - Infosys
+  - Wipro
+  - HCL
+  - HCLTech
+  - Capgemini
+  - LTIMindtree
+  - Mindtree
+  - Tech Mahindra
+  - Mphasis
+  - Virtusa
+  - Hexaware
+  - Synechron
+  - UST
+  - UST Global
+  - Zensar
+  - Birlasoft
+  - Coforge
+  - Persistent Systems
+  - Genpact
+  - NTT Data
+  - Atos
+  - Syntel
+  - CGI
+  - EPAM
+  - EPAM Systems
+  - GlobalLogic
+  - Nagarro
+  - Brillio
+  - CitiusTech
+  - Innova Solutions
+  - Infinite Computer Solutions
+  - HTC Global Services
+  - SLK America
+  - Photon Infotech
+  - ValueMomentum
+  - Eficens Systems
+  - Intellectt
+  - ERP Analysts
+  - Mastech Digital
+  - Compunnel
+  - Hoonartek
+  - Damco
+  # --- IT staffing / contract placement ---
+  - Kforce
+  - Randstad
+  - Randstad Digital
+  - Insight Global
+  - TEKsystems
+  - Apex Systems
+  - Collabera
+  - Judge Group
+  - Robert Half
+  # --- Big 4 consulting (same hiring model) ---
+  - Deloitte
+  - Ernst and Young
+  - EY
+  - PwC
+  - PricewaterhouseCoopers
+  - KPMG
