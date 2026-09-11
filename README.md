@@ -320,36 +320,41 @@ Lower the bar with `poll --threshold 0.5` to see borderline matches.
 
 ## Scheduling
 
-`refresh.sh` polls one tier and regenerates the dashboard. Both tiers take the
-same `flock`, so an overlapping run waits instead of colliding on SQLite.
+**GitHub Actions owns the schedule.** `.github/workflows/refresh.yml` polls and
+redeploys the dashboard without any local machine being awake:
+
+| Tier | Cadence | Boards | Requests | Wall clock |
+|---|---|---|---|---|
+| Tier 1 | hourly | 131 | 131 (one per board, most return `304`) | ~30 s |
+| Workday | 4x daily (02:15, 08:15, 14:15, 20:15 UTC) | 25 | ~1,400 (20 rows/request, no caching) | ~11 min |
+
+Workday costs roughly 23x the requests of Tier 1 for a fifth of the boards,
+which is why the two run separately. There is no `--force`, so each board's
+adaptive interval still applies and an hourly tick rarely polls everything.
+
+Run one by hand:
 
 ```bash
-./refresh.sh tier1      # ~30s
-./refresh.sh workday    # ~11 min
-./refresh.sh all
+gh workflow run refresh.yml -f tier=tier1     # or workday, or all
 ```
 
-Installed crontab:
+`refresh.sh` still works locally for an ad-hoc poll against your own `jobs.db`:
 
+```bash
+./refresh.sh tier1
 ```
-*/20 * * * *        ~/jobscraper/refresh.sh tier1    >> ~/jobscraper/poll.log 2>&1
-15 2,8,14,20 * * *  ~/jobscraper/refresh.sh workday  >> ~/jobscraper/poll.log 2>&1
-```
 
-Measured cost per full poll:
+Both paths take the same `flock`, so concurrent runs serialise rather than
+colliding on SQLite.
 
-| Tier | Boards | Requests | Wall clock |
-|---|---|---|---|
-| Tier 1 | 130 | 130 (one per board, most return `304`) | **29 s** |
-| Workday | 26 | ~1,400 (20 rows per request, no caching) | **662 s** |
+**Notes**
 
-Workday is ~23x the request cost for a fifth of the boards, which is why the two
-run on separate schedules. There is no `--force` in the cron, so each board's
-adaptive interval still applies and a 20-minute tick rarely polls everything.
-
-**macOS:** the project must live outside `~/Desktop`, `~/Documents` and
-`~/Downloads`. Those are TCC-protected and scheduled jobs are refused with
-`Operation not permitted` — for launchd as well as cron.
+- GitHub disables scheduled workflows after 60 days without repository
+  activity. A commit, or a manual run, resets that clock.
+- If you ever schedule this locally instead, the project must live outside
+  `~/Desktop`, `~/Documents` and `~/Downloads`. Those are TCC-protected on
+  macOS and scheduled jobs are refused with `Operation not permitted` — for
+  launchd as well as cron.
 
 ## Dashboard
 
