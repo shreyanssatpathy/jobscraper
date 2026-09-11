@@ -3,14 +3,16 @@ name: Refresh job data
 # Tier 1 is cheap (one request per board, most return 304); Workday is not
 # (20 rows per request, no caching), so they run on separate schedules.
 on:
-  # GitHub's scheduler is best-effort: runs are delayed under load and dropped
-  # outright when the queue is deep. Measured delivery on this repo was ~27% of
-  # requested slots, with one Workday run 3.5 hours late. Actions minutes are
-  # unlimited on a public repo, so we ask for more slots than we need and let
-  # GitHub drop some.
+  # GitHub's scheduler is best-effort and heavily contended. Two things were
+  # measured on this repo rather than assumed:
+  #   '0 * * * *'    -> 3 runs in 9.5h (~30% of slots)
+  #   '*/15 * * * *' -> 0 runs in 2.7h
+  # Asking for more slots made delivery worse, not better. Round minutes are
+  # also the most contended -- :00, :15, :30 and :45 are where every default
+  # cron in the world lands -- so these deliberately sit on odd offsets.
   schedule:
-    - cron: '*/15 * * * *'             # Tier 1, 4x an hour
-    - cron: '15 1,5,9,13,17,21 * * *'  # Workday, 6x a day
+    - cron: '7,37 * * * *'             # Tier 1, twice an hour, off the round minutes
+    - cron: '23 1,9,17 * * *'          # Workday, 3x a day
   workflow_dispatch:
     inputs:
       tier:
@@ -49,7 +51,7 @@ jobs:
           # Tier 1. A cron string edited here without updating this case would
           # otherwise fall through to tier1 and silently never poll Workday.
           case "${{ github.event.schedule }}" in
-            "15 1,5,9,13,17,21 * * *") TIER=workday ;;
+            "23 1,9,17 * * *") TIER=workday ;;
             "") TIER="${{ inputs.tier || 'tier1' }}" ;;
             *)  TIER=tier1 ;;
           esac
