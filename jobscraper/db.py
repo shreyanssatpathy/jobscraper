@@ -124,6 +124,16 @@ def _migrate(conn: sqlite3.Connection) -> None:
     for column, ddl in (("h1b_approvals", "INTEGER"),):
         if column not in have_src:
             conn.execute(f"ALTER TABLE source ADD COLUMN {column} {ddl}")
+
+    # Rows that predate batch tracking all belong to one initial crawl. Without
+    # this they stay NULL (so no batch is listed at all) or, if backfilled from
+    # each row's own timestamp, fragment into thousands of one-row batches.
+    unbatched = conn.execute(
+        "SELECT COUNT(*) FROM job WHERE first_seen_batch IS NULL").fetchone()[0]
+    if unbatched:
+        first = conn.execute("SELECT MIN(first_seen_at) FROM job").fetchone()[0]
+        conn.execute("UPDATE job SET first_seen_batch=? WHERE first_seen_batch IS NULL",
+                     (first,))
     conn.commit()
 
 
