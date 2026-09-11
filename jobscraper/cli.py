@@ -283,10 +283,14 @@ def _job_filters(args):
     # --within filters on the company's own posting date; --seen-within on when
     # this scraper first saw it. They answer different questions, so both exist.
     if getattr(args, "within", None):
-        where.append("j.posted_at IS NOT NULL AND j.posted_at >= datetime('now', ?)")
+        # Both sides must go through datetime(): timestamps are stored as
+        # ISO-8601 ("...T12:27:47+00:00") while datetime('now') yields a
+        # space-separated form, so a raw comparison is lexical, not
+        # chronological -- it silently over-counted every window.
+        where.append("datetime(j.posted_at) >= datetime('now', ?)")
         params.append(args.within)
     if getattr(args, "seen_within", None):
-        where.append("j.first_seen_at >= datetime('now', ?)")
+        where.append("datetime(j.first_seen_at) >= datetime('now', ?)")
         params.append(args.seen_within)
     if getattr(args, "max_exp", None) is not None:
         # Postings that state no requirement are kept unless --strict-exp.
@@ -458,7 +462,8 @@ def cmd_stats(args, conn):
         print(f"    {r[0]:<16} {r[1]}")
     print("\nrecent activity:")
     for r in q("""SELECT kind, COUNT(*) n FROM event
-                  WHERE at >= datetime('now','-7 days') GROUP BY 1 ORDER BY n DESC"""):
+                  WHERE datetime(at) >= datetime('now','-7 days')
+                  GROUP BY 1 ORDER BY n DESC"""):
         print(f"    {r[0]:<16} {r[1]} (7d)")
     return 0
 

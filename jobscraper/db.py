@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS job (
     match_score      REAL NOT NULL DEFAULT 0,
     is_match         INTEGER NOT NULL DEFAULT 0,
     first_seen_at    TEXT NOT NULL,
+    first_seen_batch TEXT,
     last_seen_at     TEXT NOT NULL,
     closed_at        TEXT,
     content_hash     TEXT,
@@ -90,6 +91,7 @@ CREATE INDEX IF NOT EXISTS job_source     ON job (source_id, closed_at);
 CREATE INDEX IF NOT EXISTS job_category   ON job (role_category, seniority);
 CREATE INDEX IF NOT EXISTS job_posted     ON job (posted_at DESC) WHERE closed_at IS NULL;
 CREATE INDEX IF NOT EXISTS job_experience ON job (min_years_exp) WHERE closed_at IS NULL;
+CREATE INDEX IF NOT EXISTS job_batch      ON job (first_seen_batch) WHERE closed_at IS NULL;
 CREATE INDEX IF NOT EXISTS event_at ON event (at DESC, kind);
 """
 
@@ -114,7 +116,8 @@ def connect(path: str | Path = "jobs.db") -> sqlite3.Connection:
 def _migrate(conn: sqlite3.Connection) -> None:
     """Add columns introduced after a database was first created."""
     have = {r["name"] for r in conn.execute("PRAGMA table_info(job)")}
-    for column, ddl in (("min_years_exp", "INTEGER"), ("is_us", "INTEGER")):
+    for column, ddl in (("min_years_exp", "INTEGER"), ("is_us", "INTEGER"),
+                        ("first_seen_batch", "TEXT")):
         if column not in have:
             conn.execute(f"ALTER TABLE job ADD COLUMN {column} {ddl}")
     have_src = {r["name"] for r in conn.execute("PRAGMA table_info(source)")}

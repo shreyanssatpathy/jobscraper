@@ -45,6 +45,9 @@ class Poller:
                  concurrency: int = 8, per_host: int = 2, dry_run: bool = False,
                  verbose: bool = True):
         self.conn = conn
+        # One identifier for this whole invocation, so every posting records
+        # which refresh introduced it rather than only the calendar day.
+        self.batch = db.now()
         self.threshold = threshold
         self.dry_run = dry_run
         self.verbose = verbose
@@ -246,9 +249,9 @@ class Poller:
                        location, is_remote, is_us, employment_type, salary_min, salary_max,
                        salary_currency, salary_raw, description_text, posted_at,
                        role_category, seniority, min_years_exp, match_score, is_match,
-                       content_hash, raw, first_seen_at, last_seen_at)
-                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id""",
-                (source_id, j.external_id, *fields, db.now(), db.now()))
+                       content_hash, raw, first_seen_at, first_seen_batch, last_seen_at)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id""",
+                (source_id, j.external_id, *fields, db.now(), self.batch, db.now()))
             jid = cur.fetchone()[0]
             if m.matched:
                 db.record_event(conn, jid, "new", f"{m.category}/{m.seniority}")

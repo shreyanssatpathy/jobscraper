@@ -184,6 +184,7 @@
     background:var(--fresh-bg); color:var(--fresh); white-space:nowrap;
   }
   .pay { color:var(--ink-2); font-weight:500; }
+  .arrived { font-size:11px; color:var(--muted); margin-top:3px; opacity:.85; }
   .intl { color:var(--cat-an); }
   .unk { font-style:italic; opacity:.8; }
 
@@ -263,6 +264,13 @@
     <fieldset class="fgroup">
       <legend>Search</legend>
       <input type="search" id="q" placeholder="Title or company…" autocomplete="off">
+    </fieldset>
+
+    <fieldset class="fgroup">
+      <legend>Arrived in refresh</legend>
+      <select id="batch"></select>
+      <p class="tier-note" style="margin-top:6px">When this scraper first saw
+        the posting — distinct from when the company posted it.</p>
     </fieldset>
 
     <fieldset class="fgroup">
@@ -354,7 +362,7 @@
 const JOBS = /*__JOBS__*/[];
 const META = /*__META__*/{};
 const F = { ID:0, TITLE:1, CO:2, CAT:3, SEN:4, EXP:5, LOC:6, REMOTE:7, SMIN:8,
-            SMAX:9, TYPE:10, POSTED:11, FOUND:12, URL:13, H1B:14, US:15 };
+            SMAX:9, TYPE:10, POSTED:11, FOUND:12, URL:13, H1B:14, US:15, BATCH:16 };
 
 const CAT_LABEL = { data_engineer:"Data Eng", data_scientist:"Data Sci",
                     ai_engineer:"AI / ML", analytics:"Analytics" };
@@ -403,7 +411,7 @@ function persist(id, state) {
 
 /* ---------- filter state ---------- */
 const S = { q:"", win:0, cats:new Set(), sens:new Set(), exp:"3", strict:false,
-            ft:true, rm:false, sp:false, loc:"us", st:"all", sort:"posted", limit:60 };
+            ft:true, rm:false, sp:false, loc:"us", st:"all", batch:"", sort:"posted", limit:60 };
 
 const $ = id => document.getElementById(id);
 const hoursAgo = d => d ? (Date.now() - new Date(d + "T12:00:00Z").getTime()) / 36e5 : Infinity;
@@ -434,6 +442,7 @@ function passes(j) {
     if (!S.q.split(/\s+/).every(t => hay.includes(t))) return false;
   }
   if (S.win && hoursAgo(j[F.POSTED]) > S.win) return false;
+  if (S.batch && j[F.BATCH] !== S.batch) return false;
   if (S.cats.size && !S.cats.has(j[F.CAT])) return false;
   if (S.sens.size && !S.sens.has(j[F.SEN])) return false;
   if (S.exp) {
@@ -492,6 +501,7 @@ function rowHTML(j) {
     <div class="body">
       <a class="rt" href="${esc(j[F.URL] || "#")}" target="_blank" rel="noopener">${esc(j[F.TITLE])}</a>
       <div class="meta">${bits.join("")}</div>
+      <div class="arrived mono">arrived ${fmtBatch(j[F.BATCH] || j[F.FOUND])}</div>
     </div>
     <div class="actions">
       <button class="act" data-id="${j[F.ID]}" data-s="star" aria-pressed="${st === "star"}"
@@ -546,9 +556,35 @@ $("reset").addEventListener("click", () => {
   document.querySelectorAll("#cats input, #sens input").forEach(i => { i.checked = false; });
   $("ft").checked = true; $("rm").checked = false; $("sp").checked = false;
   S.loc = "us"; $("loc").value = "us"; $("st").value = "all";
+  S.batch = ""; $("batch").value = "";
   [...$("win").children].forEach(x => x.setAttribute("aria-pressed", x.dataset.w === "0"));
   render();
 });
+
+/* ---------- refresh batches ---------- */
+function fmtBatch(iso) {
+  if (!iso) return "unknown";
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  const mins = (Date.now() - d.getTime()) / 6e4;
+  const when = d.toLocaleString(undefined, {
+    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  if (mins < 60) return `${when} (${Math.max(1, Math.round(mins))} min ago)`;
+  if (mins < 1440) return `${when} (${Math.round(mins / 60)}h ago)`;
+  return `${when} (${Math.round(mins / 1440)}d ago)`;
+}
+(function buildBatches() {
+  const sel = $("batch");
+  const batches = META.batches || [];
+  const opts = [`<option value="">Any refresh</option>`];
+  batches.forEach((b, i) => {
+    const oldest = i === batches.length - 1 && batches.length > 1;
+    const label = oldest ? "initial crawl" : (i === 0 ? "latest" : `#${i + 1}`);
+    opts.push(`<option value="${b.batch}">${fmtBatch(b.batch)} — ${b.count} role${b.count === 1 ? "" : "s"} (${label})</option>`);
+  });
+  sel.innerHTML = opts.join("");
+  sel.addEventListener("change", e => { S.batch = e.target.value; S.limit = 60; render(); });
+})();
 
 /* ---------- per-tier freshness + copyable refresh commands ---------- */
 const TIER_META = {

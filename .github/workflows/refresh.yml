@@ -93,7 +93,7 @@ jobs:
           # Payloads are only needed for roles that matched the filter.
           c.execute("UPDATE job SET raw=NULL, description_text=NULL WHERE is_match=0")
           c.execute("DELETE FROM job WHERE closed_at IS NOT NULL "
-                    "AND closed_at < datetime('now','-60 days')")
+                    "AND datetime(closed_at) < datetime('now','-60 days')")
           c.commit(); c.execute("VACUUM"); c.close()
           PY
           gzip -9f jobs.db

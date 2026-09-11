@@ -362,9 +362,20 @@ colliding on SQLite.
 desk of every matching role, with counts per filter and per-row triage
 (shortlist / applied / dismissed).
 
-Filters: posted window (24h / 48h / 7d / 30d), role family, max years of
-experience (with a "only if stated" strictness toggle), seniority, US location,
-full-time, remote, top-100 H-1B sponsors, free text, and six sort orders.
+Filters: **arrival batch** (which refresh introduced the role), posted window
+(24h / 48h / 7d / 30d), role family, max years of experience (with a "only if
+stated" strictness toggle), seniority, US location, full-time, remote, top-100
+H-1B sponsors, free text, and six sort orders.
+
+### Refresh batches
+
+Every poll stamps the postings it introduces with one `first_seen_batch`
+timestamp, so "what arrived in this refresh" is answerable exactly rather than
+approximated by calendar day. The dashboard lists recent refreshes with the
+number of roles each brought in, and every row shows when it arrived.
+
+Rows that predate batch tracking share a single `initial crawl` batch instead of
+appearing as thousands of one-row pseudo-batches.
 
 ### Auto-refresh
 
