@@ -3,6 +3,9 @@ __pycache__/
 
 # local state and generated output
 jobs.db*
+# ...but the committed history seed must survive: a bare `jobs.db*` pattern
+# matches at any depth and silently swallowed seed/jobs.db.gz.
+!seed/jobs.db.gz
 .poll.lock
 poll.log
 dashboard.html
