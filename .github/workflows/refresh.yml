@@ -3,9 +3,14 @@ name: Refresh job data
 # Tier 1 is cheap (one request per board, most return 304); Workday is not
 # (20 rows per request, no caching), so they run on separate schedules.
 on:
+  # GitHub's scheduler is best-effort: runs are delayed under load and dropped
+  # outright when the queue is deep. Measured delivery on this repo was ~27% of
+  # requested slots, with one Workday run 3.5 hours late. Actions minutes are
+  # unlimited on a public repo, so we ask for more slots than we need and let
+  # GitHub drop some.
   schedule:
-    - cron: '0 * * * *'            # Tier 1, hourly
-    - cron: '15 2,8,14,20 * * *'   # Workday, 4x a day
+    - cron: '*/15 * * * *'             # Tier 1, 4x an hour
+    - cron: '15 1,5,9,13,17,21 * * *'  # Workday, 6x a day
   workflow_dispatch:
     inputs:
       tier:
@@ -40,11 +45,16 @@ jobs:
       - name: Pick tier
         id: tier
         run: |
+          # Only the Workday cron is matched explicitly; everything else is
+          # Tier 1. A cron string edited here without updating this case would
+          # otherwise fall through to tier1 and silently never poll Workday.
           case "${{ github.event.schedule }}" in
-            "0 * * * *")          echo "tier=tier1"   >> "$GITHUB_OUTPUT" ;;
-            "15 2,8,14,20 * * *") echo "tier=workday" >> "$GITHUB_OUTPUT" ;;
-            *) echo "tier=${{ inputs.tier || 'tier1' }}" >> "$GITHUB_OUTPUT" ;;
+            "15 1,5,9,13,17,21 * * *") TIER=workday ;;
+            "") TIER="${{ inputs.tier || 'tier1' }}" ;;
+            *)  TIER=tier1 ;;
           esac
+          echo "tier=$TIER" >> "$GITHUB_OUTPUT"
+          echo "schedule='${{ github.event.schedule }}' -> tier=$TIER"
 
       # State carries across runs as a gzipped SQLite file (~15 MB). Without it
       # every run would look like a first crawl and first_seen_at would reset,

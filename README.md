@@ -323,10 +323,17 @@ Lower the bar with `poll --threshold 0.5` to see borderline matches.
 **GitHub Actions owns the schedule.** `.github/workflows/refresh.yml` polls and
 redeploys the dashboard without any local machine being awake:
 
-| Tier | Cadence | Boards | Requests | Wall clock |
+| Tier | Cadence requested | Boards | Requests | Wall clock |
 |---|---|---|---|---|
-| Tier 1 | hourly | 131 | 131 (one per board, most return `304`) | ~30 s |
-| Workday | 4x daily (02:15, 08:15, 14:15, 20:15 UTC) | 25 | ~1,400 (20 rows/request, no caching) | ~11 min |
+| Tier 1 | every 15 min | 131 | 131 (one per board, most return `304`) | ~30 s |
+| Workday | 6x daily (01:15, 05:15, 09:15, 13:15, 17:15, 21:15 UTC) | 25 | ~1,400 (20 rows/request, no caching) | ~11 min |
+
+**These are requests, not guarantees.** GitHub's scheduler is best-effort:
+measured delivery on this repo was ~27% of requested slots over a 9.5 hour
+window, and one Workday run fired 3.5 hours after its slot. The cadence is
+deliberately over-scheduled so that dropped runs still leave a useful real
+rate. Actions minutes are unlimited on a public repository, and a Tier 1 run
+that finds nothing costs ~30 s of mostly `304` responses.
 
 Workday costs roughly 23x the requests of Tier 1 for a fifth of the boards,
 which is why the two run separately. There is no `--force`, so each board's
