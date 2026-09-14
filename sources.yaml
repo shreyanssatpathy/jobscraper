@@ -6,6 +6,7 @@
 # Companies listed in blocklist.yaml are refused on import and never appear here.
 sources:
   - { ats: workday, token: salesforce, company: "Salesforce", h1b_approvals: 5059, poll_interval_s: 21600, config: { host: salesforce.wd12.myworkdayjobs.com, site: External_Career_Site } }
+  - { ats: workday, token: capitalone, company: "Capital One", h1b_approvals: 2876, poll_interval_s: 21600, config: { host: capitalone.wd12.myworkdayjobs.com, site: Capital_One } }
   - { ats: workday, token: adobe, company: "Adobe", h1b_approvals: 2607, poll_interval_s: 21600, config: { host: adobe.wd5.myworkdayjobs.com, site: external_experienced } }
   - { ats: smartrecruiters, token: servicenow, company: "ServiceNow", h1b_approvals: 2085 }
   - { ats: workday, token: paloaltonetworks, company: "Palo Alto Networks", h1b_approvals: 1822, poll_interval_s: 21600, config: { host: paloaltonetworks.wd5.myworkdayjobs.com, site: panwexternalcareers } }
@@ -48,6 +49,7 @@ sources:
   - { ats: greenhouse, token: coinbase, company: "Coinbase" }
   - { ats: greenhouse, token: collibra, company: "Collibra" }
   - { ats: ashby, token: confluent, company: "Confluent" }
+  - { ats: workday, token: copart, company: "Copart", poll_interval_s: 21600, config: { host: copart.wd12.myworkdayjobs.com, site: copart } }
   - { ats: greenhouse, token: cresta, company: "Cresta" }
   - { ats: ashby, token: crusoe, company: "Crusoe" }
   - { ats: ashby, token: cursor, company: "Cursor" }
