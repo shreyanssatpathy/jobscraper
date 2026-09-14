@@ -374,6 +374,21 @@ Filters: **arrival batch** (which refresh introduced the role), posted window
 stated" strictness toggle), seniority, US location, full-time, remote, top-100
 H-1B sponsors, free text, and six sort orders.
 
+### Posting age policy
+
+Matches older than **30 days by the company's own posting date** stop appearing
+(`MAX_POSTING_AGE_DAYS` in `jobscraper/pipeline.py`; set 0 to disable).
+
+They are **marked as non-matches, not deleted**. Deleting them would be worse
+than useless: the postings are still live on the company's board, so the next
+poll would re-insert them as brand-new arrivals and drop months of backlog
+straight into the top of "newest arrivals". Keeping the row means
+close-detection still works and nothing is resurrected as fresh. Text and raw
+payloads are cleared for aged-out rows to reclaim space.
+
+A posting with **no** date is never treated as old — absence of a date is not
+evidence of staleness.
+
 ### Refresh batches
 
 Every poll stamps the postings it introduces with one `first_seen_batch`

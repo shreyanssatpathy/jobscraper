@@ -14,9 +14,16 @@ from . import db
 from .classify import classify, is_remote
 from .experience import extract_min_years
 from .location import is_us as classify_us
+from datetime import datetime, timezone, timedelta
 from .connectors import RawJob, Req, get as get_connector
 
 UA = "jobscraper/0.1 (personal job search; +contact: set-your-email-here)"
+
+#: Postings older than this stop counting as matches. They are NOT deleted:
+#: the row stays so close-detection keeps working and so a still-live posting is
+#: never re-inserted as a fresh arrival on the next poll, which would put months
+#: of backlog at the top of "newest arrivals". Set 0 to disable.
+MAX_POSTING_AGE_DAYS = 30
 
 #: How much a board is allowed to shrink in one poll before we refuse to close
 #: anything. A truncated or errored response otherwise looks like a mass layoff.
@@ -25,6 +32,23 @@ SHRINK_GUARD = 0.5
 MIN_INTERVAL = 900        # 15 min after a change
 MAX_INTERVAL = 86_400     # 24 h for boards that never move
 BACKOFF_FACTOR = 1.5
+
+
+def too_old(posted_at: str | None, max_days: int = MAX_POSTING_AGE_DAYS) -> bool:
+    """True when the company published this long enough ago to stop caring.
+
+    An unknown date is never treated as old -- absence of evidence is not
+    evidence the posting is stale.
+    """
+    if not max_days or not posted_at:
+        return False
+    try:
+        when = datetime.fromisoformat(str(posted_at).replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    if when.tzinfo is None:
+        when = when.replace(tzinfo=timezone.utc)
+    return when < datetime.now(timezone.utc) - timedelta(days=max_days)
 
 
 def _hash_list(jobs: list[RawJob]) -> str:
@@ -224,6 +248,14 @@ class Poller:
 
     # ---------------- persistence ----------------
     def _upsert(self, source_id: int, company: str, j: RawJob, m) -> str:
+        """Insert or refresh one posting.
+
+        Detail-only fields are COALESCEd on update. Workday's list call carries
+        no posting date (only prose like "Posted 30+ Days Ago"), and a match
+        that already has a description is not re-enriched -- so assigning these
+        fields unconditionally wrote NULL over good data on every re-poll,
+        erasing the dates every date filter depends on.
+        """
         conn = self.conn
         chash = _hash_job(j)
         remote = j.is_remote
@@ -234,13 +266,16 @@ class Poller:
             (source_id, j.external_id)).fetchone()
 
         us = classify_us(j.location)
+        # Age gate sits here, after enrichment, because Workday's posting date
+        # only arrives with the detail payload.
+        matched = bool(m.matched) and not too_old(j.posted_at)
         fields = (j.url, j.title, j.department, j.team, j.location,
                   int(remote) if remote is not None else None,
                   int(us) if us is not None else None, j.employment_type,
                   j.salary_min, j.salary_max, j.salary_currency, j.salary_raw,
                   j.description_text, j.posted_at,
                   m.category, m.seniority, extract_min_years(j.description_text),
-                  m.score, int(m.matched),
+                  m.score, int(matched),
                   chash, json.dumps(j.raw) if m.matched else None)
 
         if row is None:
@@ -253,7 +288,7 @@ class Poller:
                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id""",
                 (source_id, j.external_id, *fields, db.now(), self.batch, db.now()))
             jid = cur.fetchone()[0]
-            if m.matched:
+            if matched:
                 db.record_event(conn, jid, "new", f"{m.category}/{m.seniority}")
                 db.index_fts(conn, jid, j.title, j.description_text, company)
             return "new"
@@ -261,16 +296,21 @@ class Poller:
         reopened = row["closed_at"] is not None
         changed = row["content_hash"] != chash
         conn.execute(
-            """UPDATE job SET url=?, title=?, department=?, team=?, location=?, is_remote=?,
-                   is_us=COALESCE(?, is_us), employment_type=?, salary_min=?, salary_max=?, salary_currency=?, salary_raw=?,
-                   description_text=COALESCE(?, description_text), posted_at=?,
+            """UPDATE job SET url=?, title=?, department=?, team=?, location=?,
+                   is_remote=COALESCE(?, is_remote), is_us=COALESCE(?, is_us),
+                   employment_type=COALESCE(?, employment_type),
+                   salary_min=COALESCE(?, salary_min), salary_max=COALESCE(?, salary_max),
+                   salary_currency=COALESCE(?, salary_currency),
+                   salary_raw=COALESCE(?, salary_raw),
+                   description_text=COALESCE(?, description_text),
+                   posted_at=COALESCE(?, posted_at),
                    role_category=?, seniority=?, min_years_exp=COALESCE(?, min_years_exp),
                    match_score=?, is_match=?, content_hash=?,
                    raw=COALESCE(?, raw), last_seen_at=?, closed_at=NULL
                WHERE id=?""", (*fields, db.now(), row["id"]))
-        if m.matched and reopened:
+        if matched and reopened:
             db.record_event(conn, row["id"], "reopened")
-        elif m.matched and changed:
+        elif matched and changed:
             db.record_event(conn, row["id"], "updated")
         return "updated" if changed else "seen"
 
@@ -313,7 +353,8 @@ async def enrich_missing(conn, *, limit: int = 2000, verbose: bool = True) -> in
     rows = conn.execute("""
         SELECT j.id, j.external_id, j.title, s.ats, s.token, s.config
         FROM job j JOIN source s ON s.id = j.source_id
-        WHERE j.is_match = 1 AND j.closed_at IS NULL AND j.description_text IS NULL
+        WHERE j.is_match = 1 AND j.closed_at IS NULL
+          AND (j.description_text IS NULL OR j.posted_at IS NULL)
         LIMIT ?""", (limit,)).fetchall()
     if not rows:
         if verbose:
@@ -338,10 +379,11 @@ async def enrich_missing(conn, *, limit: int = 2000, verbose: bool = True) -> in
                 connector.apply_detail(job, r.json())
             except Exception:                                      # noqa: BLE001
                 return
-            if not job.description_text:
+            if not (job.description_text or job.posted_at):
                 return
             conn.execute(
-                """UPDATE job SET description_text=?, min_years_exp=?,
+                """UPDATE job SET description_text=COALESCE(?, description_text),
+                       min_years_exp=COALESCE(?, min_years_exp),
                        posted_at=COALESCE(?, posted_at),
                        employment_type=COALESCE(?, employment_type),
                        raw=COALESCE(?, raw)

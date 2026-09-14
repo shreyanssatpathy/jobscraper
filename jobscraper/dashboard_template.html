@@ -347,7 +347,7 @@
       <label for="sort">Sort</label>
       <select id="sort">
         <option value="posted">Newest posted</option>
-        <option value="found">Recently discovered</option>
+        <option value="found">Newest arrivals (this refresh first)</option>
         <option value="pay">Highest pay</option>
         <option value="h1b">Most H-1B approvals</option>
         <option value="exp">Least experience asked</option>
@@ -468,7 +468,11 @@ function passes(j) {
 
 const SORTS = {
   posted: (a,b) => (b[F.POSTED] || "").localeCompare(a[F.POSTED] || ""),
-  found:  (a,b) => (b[F.FOUND] || "").localeCompare(a[F.FOUND] || ""),
+  // Newest arrivals first, then newest posted within a batch. Sorting on the
+  // raw discovery timestamp alone put the whole backfilled initial crawl at the
+  // top, which is the opposite of "what showed up in the last refresh".
+  found:  (a,b) => (b[F.BATCH] || b[F.FOUND] || "").localeCompare(a[F.BATCH] || a[F.FOUND] || "")
+                || (b[F.POSTED] || "").localeCompare(a[F.POSTED] || ""),
   pay:    (a,b) => (b[F.SMAX] || b[F.SMIN] || 0) - (a[F.SMAX] || a[F.SMIN] || 0),
   h1b:    (a,b) => (b[F.H1B] || 0) - (a[F.H1B] || 0),
   exp:    (a,b) => (a[F.EXP] === null ? 99 : a[F.EXP]) - (b[F.EXP] === null ? 99 : b[F.EXP]),
