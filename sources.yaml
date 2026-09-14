@@ -1,11 +1,12 @@
 # Boards verified live. Tier 1 = one GET per board; Tier 2 (workday) = POST,
 # 20/page, no ETag, polled every 6h.
-# h1b_approvals = USCIS approvals FY2020-24 (top-100 sponsor list), matched on
-# exact whole-word company identity. Absence means 'not in the top 100',
+# h1b_approvals = USCIS petition counts. Absence means 'not in the list used',
 # NOT 'does not sponsor'. Broadcom carries VMware's filings after the acquisition.
-# Companies listed in blocklist.yaml are refused on import and never appear here.
+# Companies in blocklist.yaml are refused on import and never appear here.
 sources:
+  - { ats: workday, token: intel, company: "Intel", h1b_approvals: 7693, poll_interval_s: 21600, config: { host: intel.wd1.myworkdayjobs.com, site: External } }
   - { ats: workday, token: salesforce, company: "Salesforce", h1b_approvals: 5059, poll_interval_s: 21600, config: { host: salesforce.wd12.myworkdayjobs.com, site: External_Career_Site } }
+  - { ats: workday, token: paypal, company: "PayPal", h1b_approvals: 2940, poll_interval_s: 21600, config: { host: paypal.wd1.myworkdayjobs.com, site: jobs } }
   - { ats: workday, token: capitalone, company: "Capital One", h1b_approvals: 2876, poll_interval_s: 21600, config: { host: capitalone.wd12.myworkdayjobs.com, site: Capital_One } }
   - { ats: workday, token: adobe, company: "Adobe", h1b_approvals: 2607, poll_interval_s: 21600, config: { host: adobe.wd5.myworkdayjobs.com, site: external_experienced } }
   - { ats: smartrecruiters, token: servicenow, company: "ServiceNow", h1b_approvals: 2085 }
@@ -13,13 +14,39 @@ sources:
   - { ats: workday, token: hpe, company: "HPE", h1b_approvals: 1395, poll_interval_s: 21600, config: { host: hpe.wd5.myworkdayjobs.com, site: Jobsathpe } }
   - { ats: workday, token: broadcom, company: "Broadcom (VMware)", h1b_approvals: 1126, poll_interval_s: 21600, config: { host: broadcom.wd1.myworkdayjobs.com, site: External_Career } }
   - { ats: greenhouse, token: databricks, company: "Databricks", h1b_approvals: 1107 }
+  - { ats: ashby, token: applied, company: "Applied Materials", h1b_approvals: 1083 }
   - { ats: workday, token: amgen, company: "Amgen", h1b_approvals: 1070, poll_interval_s: 21600, config: { host: amgen.wd1.myworkdayjobs.com, site: Careers } }
   - { ats: workday, token: workday, company: "Workday", h1b_approvals: 1028, poll_interval_s: 21600, config: { host: workday.wd5.myworkdayjobs.com, site: Workday } }
+  - { ats: greenhouse, token: pinterest, company: "Pinterest", h1b_approvals: 882 }
+  - { ats: smartrecruiters, token: westerndigital, company: "Western Digital", h1b_approvals: 866 }
   - { ats: smartrecruiters, token: thebostonconsultinggroup, company: "Boston Consulting Group", h1b_approvals: 818 }
   - { ats: workday, token: autodesk, company: "Autodesk", h1b_approvals: 775, poll_interval_s: 21600, config: { host: autodesk.wd1.myworkdayjobs.com, site: EXT } }
+  - { ats: lever, token: zoox, company: "Zoox", h1b_approvals: 733 }
   - { ats: workday, token: gilead, company: "Gilead Sciences", h1b_approvals: 659, poll_interval_s: 21600, config: { host: gilead.wd1.myworkdayjobs.com, site: GileadCareers } }
   - { ats: workday, token: thermofisher, company: "Thermo Fisher Scientific", h1b_approvals: 641, poll_interval_s: 21600, config: { host: thermofisher.wd5.myworkdayjobs.com, site: ThermofisherCareers } }
+  - { ats: workday, token: equifax, company: "Equifax", h1b_approvals: 629, poll_interval_s: 21600, config: { host: equifax.wd5.myworkdayjobs.com, site: External } }
+  - { ats: workday, token: fca, company: "Stellantis (FCA)", h1b_approvals: 626, poll_interval_s: 21600, config: { host: fca.wd3.myworkdayjobs.com, site: Fca_Careers } }
+  - { ats: greenhouse, token: block, company: "Block", h1b_approvals: 588 }
   - { ats: greenhouse, token: waymo, company: "Waymo", h1b_approvals: 575 }
+  - { ats: smartrecruiters, token: abbvie, company: "AbbVie", h1b_approvals: 554 }
+  - { ats: workday, token: regeneron, company: "Regeneron", h1b_approvals: 549, poll_interval_s: 21600, config: { host: regeneron.wd1.myworkdayjobs.com, site: Careers } }
+  - { ats: workday, token: analogdevices, company: "Analog Devices", h1b_approvals: 521, poll_interval_s: 21600, config: { host: analogdevices.wd1.myworkdayjobs.com, site: External } }
+  - { ats: workday, token: iqvia, company: "IQVIA", h1b_approvals: 512, poll_interval_s: 21600, config: { host: iqvia.wd1.myworkdayjobs.com, site: iqvia } }
+  - { ats: workday, token: marvell, company: "Marvell", h1b_approvals: 498, poll_interval_s: 21600, config: { host: marvell.wd1.myworkdayjobs.com, site: MarvellCareers } }
+  - { ats: workday, token: relx, company: "RELX", h1b_approvals: 471, poll_interval_s: 21600, config: { host: relx.wd3.myworkdayjobs.com, site: relx } }
+  - { ats: workday, token: nxp, company: "NXP", h1b_approvals: 458, poll_interval_s: 21600, config: { host: nxp.wd3.myworkdayjobs.com, site: Careers } }
+  - { ats: greenhouse, token: roblox, company: "Roblox", h1b_approvals: 453 }
+  - { ats: greenhouse, token: zscaler, company: "Zscaler", h1b_approvals: 435 }
+  - { ats: workday, token: zoom, company: "Zoom", h1b_approvals: 364, poll_interval_s: 21600, config: { host: zoom.wd5.myworkdayjobs.com, site: zoom } }
+  - { ats: greenhouse, token: asm, company: "ASM", h1b_approvals: 359 }
+  - { ats: lever, token: palantir, company: "Palantir", h1b_approvals: 348 }
+  - { ats: workday, token: prudential, company: "Prudential", h1b_approvals: 315, poll_interval_s: 21600, config: { host: prudential.wd3.myworkdayjobs.com, site: prudential } }
+  - { ats: greenhouse, token: okta, company: "Okta", h1b_approvals: 307 }
+  - { ats: workday, token: equinix, company: "Equinix", h1b_approvals: 305, poll_interval_s: 21600, config: { host: equinix.wd1.myworkdayjobs.com, site: External } }
+  - { ats: greenhouse, token: roku, company: "Roku", h1b_approvals: 301 }
+  - { ats: smartrecruiters, token: sandisk, company: "SanDisk", h1b_approvals: 295 }
+  - { ats: workday, token: whitecase, company: "White & Case", h1b_approvals: 274, poll_interval_s: 21600, config: { host: whitecase.wd1.myworkdayjobs.com, site: External } }
+  - { ats: workday, token: aptiv, company: "Aptiv", h1b_approvals: 273, poll_interval_s: 21600, config: { host: aptiv.wd5.myworkdayjobs.com, site: Aptiv_Careers } }
   - { ats: ashby, token: abridge, company: "Abridge" }
   - { ats: ashby, token: acorns, company: "Acorns" }
   - { ats: greenhouse, token: affirm, company: "Affirm" }
